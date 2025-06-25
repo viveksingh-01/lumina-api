@@ -1,1 +1,10 @@
 package routes
+
+import (
+	"github.com/gorilla/mux"
+	"github.com/viveksingh-01/lumina-api/handlers"
+)
+
+func RegisterRoutes(router *mux.Router) {
+	router.HandleFunc("/register", handlers.Register).Methods("POST")
+}
