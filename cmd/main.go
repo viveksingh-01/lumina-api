@@ -8,13 +8,13 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"github.com/viveksingh-01/lumina-api/routes"
 )
 
 func main() {
 	fmt.Println("Welcome to Lumina API.")
 
-	// Load variables from .env file
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading the .env file")
 	}
@@ -22,14 +22,19 @@ func main() {
 	r := mux.NewRouter()
 	routes.RegisterRoutes(r)
 
-	// Use port from .env
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	})
+	handler := c.Handler(r)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
 	log.Println("Server started at port:", port)
-
-	// Start the HTTP server and listen at the port-8080
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
