@@ -10,8 +10,11 @@ import (
 )
 
 var (
-	Client *genai.Client
+	Client   *genai.Client
+	sessions = make(map[string]*genai.Chat)
 )
+
+const GEMINI_MODEL = "gemini-2.0-flash"
 
 func HandleChat(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -31,6 +34,15 @@ func HandleChat(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("user:", req.UserID)
 	log.Println("message:", req.Message)
+
+	session, exists := sessions[req.UserID]
+	if !exists {
+		session, err := Client.Chats.Create(r.Context(), GEMINI_MODEL, nil, nil)
+		if err != nil {
+			log.Println(err)
+		}
+		sessions[req.UserID] = session
+	}
 
 	// TODO
 }
