@@ -44,5 +44,11 @@ func HandleChat(w http.ResponseWriter, r *http.Request) {
 		sessions[req.UserID] = session
 	}
 
-	// TODO
+	resp, err := session.SendMessage(r.Context(), genai.Part{Text: req.Message})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Println(resp.Text())
 }
