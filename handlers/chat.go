@@ -50,5 +50,7 @@ func HandleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(resp.Text())
+	res := models.ChatResponse{Response: resp.Text()}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(res)
 }
