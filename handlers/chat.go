@@ -6,6 +6,11 @@ import (
 	"net/http"
 
 	"github.com/viveksingh-01/lumina-api/models"
+	"google.golang.org/genai"
+)
+
+var (
+	Client *genai.Client
 )
 
 func HandleChat(w http.ResponseWriter, r *http.Request) {

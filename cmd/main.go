@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
+	"github.com/viveksingh-01/lumina-api/config"
 	"github.com/viveksingh-01/lumina-api/routes"
 )
 
@@ -29,6 +30,8 @@ func main() {
 		AllowCredentials: true,
 	})
 	handler := c.Handler(r)
+
+	config.InitializeGemini()
 
 	port := os.Getenv("PORT")
 	if port == "" {
