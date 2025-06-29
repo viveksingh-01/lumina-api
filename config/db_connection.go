@@ -30,4 +30,5 @@ func ConnectToDB() {
 	if DB == nil {
 		log.Fatal("Database connection is not initialized")
 	}
+	handlers.SetUserCollection(DB.Collection("users"))
 }

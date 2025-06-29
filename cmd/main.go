@@ -20,6 +20,8 @@ func main() {
 		log.Fatal("Error loading the .env file")
 	}
 
+	config.ConnectToDB()
+
 	r := mux.NewRouter()
 	routes.RegisterRoutes(r)
 
