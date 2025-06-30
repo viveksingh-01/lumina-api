@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/viveksingh-01/lumina-api/models"
 	"google.golang.org/genai"
@@ -12,6 +13,7 @@ import (
 var (
 	Client   *genai.Client
 	sessions = make(map[string]*genai.Chat)
+	mu       sync.Mutex
 )
 
 const GEMINI_MODEL = "gemini-2.0-flash"
@@ -32,9 +34,7 @@ func HandleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("user:", req.UserID)
-	log.Println("message:", req.Message)
-
+	mu.Lock()
 	session, exists := sessions[req.UserID]
 	if !exists {
 		session, err := Client.Chats.Create(r.Context(), GEMINI_MODEL, nil, nil)
@@ -43,6 +43,7 @@ func HandleChat(w http.ResponseWriter, r *http.Request) {
 		}
 		sessions[req.UserID] = session
 	}
+	mu.Unlock()
 
 	resp, err := session.SendMessage(r.Context(), genai.Part{Text: req.Message})
 	if err != nil {
