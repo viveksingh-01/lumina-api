@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/viveksingh-01/lumina-api/models"
 	"github.com/viveksingh-01/lumina-api/utils"
@@ -56,6 +57,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user.Password = hashedPassword
+	user.CreatedAt = time.Now()
+
+	if _, err := userCollection.InsertOne(context.TODO(), user); err != nil {
+		log.Println("Error occurred while inserting user's record to DB:", err.Error())
+		http.Error(w, "Couldn't process the request, please try again.", http.StatusInternalServerError)
+		return
+	}
+	log.Printf("New user registered: %s", user.UserID)
 
 	// TODO
 }

@@ -22,7 +22,7 @@ func ConnectToDB() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := client.Ping(ctx, nil); err != nil {
-		log.Fatal("Could not establish connection to the database.")
+		log.Fatal("Could not establish connection to the database.", err.Error())
 	}
 	log.Println("Connected to database successfully!")
 
