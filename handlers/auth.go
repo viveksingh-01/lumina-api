@@ -3,9 +3,11 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/viveksingh-01/lumina-api/models"
+	"github.com/viveksingh-01/lumina-api/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -45,6 +47,15 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// Generate hashed-password and store as password
+	hashedPassword, err := utils.HashPassword(user.Password)
+	if err != nil {
+		log.Println("Error occurred while hashing password:", err.Error())
+		http.Error(w, "Couldn't process the request, please try again.", http.StatusInternalServerError)
+		return
+	}
+	user.Password = hashedPassword
 
 	// TODO
 }
