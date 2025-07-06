@@ -20,28 +20,15 @@ func SetUserCollection(c *mongo.Collection) {
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
-	// Validate request method
-	if r.Method != http.MethodPost {
-		utils.SendErrorResponse(w, http.StatusMethodNotAllowed, utils.ErrorResponse{
-			Error: "Invalid request method, please use POST method.",
-		})
+	if !validateRequestMethod(w, r) {
 		return
 	}
-	// Validate request body to not be nil
-	if r.Body == nil {
-		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
-			Error: "Invalid request body",
-		})
+	if !validateRequestBody(w, r) {
 		return
 	}
 
-	// Decoding the request body in JSON to struct format
 	var user models.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		log.Println("Error occurred while decoding request JSON", err.Error())
-		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
-			Error: "Invalid request body",
-		})
+	if !decodeToJSON(w, r, &user) {
 		return
 	}
 
@@ -87,4 +74,39 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Registration successful. You can now log in.",
 	})
+}
+
+// Validates request method
+func validateRequestMethod(w http.ResponseWriter, r *http.Request) bool {
+	if r.Method != http.MethodPost {
+		utils.SendErrorResponse(w, http.StatusMethodNotAllowed, utils.ErrorResponse{
+			Error: "Invalid request method, please use POST method.",
+		})
+		return false
+	}
+	return true
+}
+
+// Validates request body to not be nil
+func validateRequestBody(w http.ResponseWriter, r *http.Request) bool {
+	if r.Body == nil {
+		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
+			Error: "Request body cannot be empty",
+		})
+		defer r.Body.Close()
+		return false
+	}
+	return true
+}
+
+// Decodes the request body in JSON to struct format
+func decodeToJSON(w http.ResponseWriter, r *http.Request, user *models.User) bool {
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		log.Println("Error occurred while decoding request JSON", err.Error())
+		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
+			Error: "Invalid request body",
+		})
+		return false
+	}
+	return true
 }
