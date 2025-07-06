@@ -22,30 +22,42 @@ func SetUserCollection(c *mongo.Collection) {
 func Register(w http.ResponseWriter, r *http.Request) {
 	// Validate request method
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method, please use POST method.", http.StatusMethodNotAllowed)
+		utils.SendErrorResponse(w, http.StatusMethodNotAllowed, utils.ErrorResponse{
+			Error: "Invalid request method, please use POST method.",
+		})
 		return
 	}
 	// Validate request body to not be nil
 	if r.Body == nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
+			Error: "Invalid request body",
+		})
 		return
 	}
 
 	// Decoding the request body in JSON to struct format
 	var user models.User
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, "Error occurred while decoding request JSON", http.StatusBadRequest)
+		log.Println("Error occurred while decoding request JSON", err.Error())
+		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
+			Error: "Invalid request body",
+		})
 		return
 	}
 
 	// Check if the user already exists based on the 'userId'
 	err := userCollection.FindOne(context.TODO(), bson.M{"userId": user.UserID}).Decode(&user)
 	if err == nil {
-		http.Error(w, "Username already exists, please try with a different one.", http.StatusBadRequest)
+		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
+			Error: "Username already exists, please try with a different one.",
+		})
 		return
 	}
 	if err != mongo.ErrNoDocuments {
-		http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
+		log.Println("Database error: " + err.Error())
+		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
+			Error: "An internal error occurred, please try again.",
+		})
 		return
 	}
 
@@ -53,7 +65,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		log.Println("Error occurred while hashing password:", err.Error())
-		http.Error(w, "Couldn't process the request, please try again.", http.StatusInternalServerError)
+		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
+			Error: "Couldn't process the request, please try again.",
+		})
 		return
 	}
 	user.Password = hashedPassword
@@ -61,7 +75,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	if _, err := userCollection.InsertOne(context.TODO(), user); err != nil {
 		log.Println("Error occurred while inserting user's record to DB:", err.Error())
-		http.Error(w, "Couldn't process the request, please try again.", http.StatusInternalServerError)
+		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
+			Error: "Couldn't process the request, please try again.",
+		})
 		return
 	}
 	log.Printf("New user registered: %s", user.UserID)
