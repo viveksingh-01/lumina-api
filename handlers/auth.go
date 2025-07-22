@@ -33,7 +33,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the user already exists based on the 'userId'
-	err := userCollection.FindOne(context.TODO(), bson.M{"userId": user.Email}).Decode(&user)
+	err := userCollection.FindOne(context.TODO(), bson.M{"email": user.Email}).Decode(&user)
 	if err == nil {
 		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
 			Error: "Username already exists, please try with a different one.",
