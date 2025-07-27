@@ -27,13 +27,15 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user models.User
-	if !decodeToJSON(w, r, &user) {
+	var req models.RegisterRequest
+	if !decodeToJSON(w, r, &req) {
 		return
 	}
 
+	var user models.User
+
 	// Check if the user already exists based on the 'userId'
-	err := userCollection.FindOne(context.TODO(), bson.M{"userId": user.Email}).Decode(&user)
+	err := userCollection.FindOne(context.TODO(), bson.M{"email": req.Email}).Decode(&user)
 	if err == nil {
 		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
 			Error: "Username already exists, please try with a different one.",
@@ -49,7 +51,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate hashed-password and store as password
-	hashedPassword, err := utils.HashPassword(user.Password)
+	hashedPassword, err := utils.HashPassword(req.Password)
 	if err != nil {
 		log.Println("Error occurred while hashing password:", err.Error())
 		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
@@ -57,6 +59,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
+	user.Email = req.Email
+	user.Name = req.Name
 	user.Password = hashedPassword
 	user.CreatedAt = time.Now()
 
@@ -100,8 +105,8 @@ func validateRequestBody(w http.ResponseWriter, r *http.Request) bool {
 }
 
 // Decodes the request body in JSON to struct format
-func decodeToJSON(w http.ResponseWriter, r *http.Request, user *models.User) bool {
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+func decodeToJSON(w http.ResponseWriter, r *http.Request, v any) bool {
+	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
 		log.Println("Error occurred while decoding request JSON", err.Error())
 		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
 			Error: "Invalid request body",
