@@ -74,10 +74,20 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("New user registered: %s", user.Email)
 
+	token, err := utils.GenerateJWT(user.ID.Hex())
+	if err != nil {
+		log.Println("Error generating JWT:", err.Error())
+		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
+			Error: "Couldn't process the request, please try again.",
+		})
+		return
+	}
+
 	// Write the response back to the client
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Registration successful. You can now log in.",
+		"token":   token,
 	})
 }
 
