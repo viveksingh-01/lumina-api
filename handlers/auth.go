@@ -83,11 +83,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Write the response back to the client
 	w.WriteHeader(http.StatusCreated)
+
+	// Set the token as cookie
+	setCookie(w, token)
+
+	// Send the response to client
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Registration successful. You can now log in.",
-		"token":   token,
 	})
 }
 
@@ -124,4 +127,16 @@ func decodeToJSON(w http.ResponseWriter, r *http.Request, v any) bool {
 		return false
 	}
 	return true
+}
+
+func setCookie(w http.ResponseWriter, token string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    token,
+		HttpOnly: true,
+		Path:     "/",
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Now().Add(24 * time.Hour),
+	})
 }
