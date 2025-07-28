@@ -26,7 +26,7 @@ func main() {
 	routes.RegisterRoutes(r)
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins:   []string{os.Getenv("ALLOWED_ORIGIN")},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
