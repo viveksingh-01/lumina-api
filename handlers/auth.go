@@ -26,14 +26,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	if !validateRequestBody(w, r) {
 		return
 	}
-
 	var req models.RegisterRequest
 	if !decodeToJSON(w, r, &req) {
 		return
 	}
 
 	var user models.User
-
 	// Check if the user already exists based on the 'userId'
 	err := userCollection.FindOne(context.TODO(), bson.M{"email": req.Email}).Decode(&user)
 	if err == nil {
@@ -89,8 +87,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	setCookie(w, token)
 
 	// Send the response to client
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Registration successful. You can now log in.",
+	json.NewEncoder(w).Encode(map[string]any{
+		"success": true,
+		"message": "User registered successfully.",
+		"data": map[string]string{
+			"id":    user.ID.Hex(),
+			"email": user.Email,
+			"name":  user.Name,
+		},
 	})
 }
 
