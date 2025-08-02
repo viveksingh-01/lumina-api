@@ -5,3 +5,8 @@ type RegisterRequest struct {
 	Name     string `bson:"name"`
 	Password string `bson:"password"`
 }
+
+type LoginRequest struct {
+	Email    string `bson:"email"`
+	Password string `bson:"password"`
+}
