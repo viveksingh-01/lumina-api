@@ -134,6 +134,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token, err := utils.GenerateJWT(user.ID.Hex())
+	if err != nil {
+		log.Println("Error generating JWT:", err.Error())
+		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
+			Error: "Couldn't process the request, please try again.",
+		})
+		return
+	}
+	setCookie(w, token)
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
