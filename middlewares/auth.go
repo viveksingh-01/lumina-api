@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -18,38 +19,39 @@ const userContextKey = contextKey("user")
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("auth_token")
+		claims, err := GetClaimsFromAuthCookie(w, r)
 		if err != nil {
 			utils.SendErrorResponse(w, http.StatusUnauthorized, utils.ErrorResponse{
-				Error: "Unauthorized: missing auth token",
+				Error: "Unauthorized: " + err.Error(),
 			})
-			return
-		}
-
-		tokenStr := strings.TrimSpace(cookie.Value)
-		if tokenStr == "" {
-			utils.SendErrorResponse(w, http.StatusUnauthorized, utils.ErrorResponse{
-				Error: "Unauthorized: empty token",
-			})
-			return
-		}
-
-		claims := &jwt.RegisteredClaims{}
-		token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (any, error) {
-			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, jwt.ErrTokenSignatureInvalid
-			}
-			return []byte(jwtSecret), nil
-		})
-
-		if err != nil || !token.Valid {
-			utils.SendErrorResponse(w, http.StatusUnauthorized, utils.ErrorResponse{
-				Error: "Unauthorized: invalid token",
-			})
-			return
 		}
 
 		ctx := context.WithValue(r.Context(), userContextKey, claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func GetClaimsFromAuthCookie(w http.ResponseWriter, r *http.Request) (*jwt.RegisteredClaims, error) {
+	cookie, err := r.Cookie("auth_token")
+	if err != nil {
+		return nil, fmt.Errorf("missing auth token")
+	}
+
+	tokenStr := strings.TrimSpace(cookie.Value)
+	if tokenStr == "" {
+		return nil, fmt.Errorf("empty token")
+	}
+
+	claims := &jwt.RegisteredClaims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (any, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrTokenSignatureInvalid
+		}
+		return []byte(jwtSecret), nil
+	})
+
+	if err != nil || !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+	return claims, nil
 }
