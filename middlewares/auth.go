@@ -55,3 +55,10 @@ func GetClaimsFromAuthCookie(w http.ResponseWriter, r *http.Request) (*jwt.Regis
 	}
 	return claims, nil
 }
+
+func GetClaimsFromContext(ctx context.Context) *jwt.RegisteredClaims {
+	if claims, ok := ctx.Value(userContextKey).(*jwt.RegisteredClaims); ok {
+		return claims
+	}
+	return nil
+}
