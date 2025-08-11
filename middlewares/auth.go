@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/viveksingh-01/lumina-api/utils"
@@ -24,6 +25,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			utils.SendErrorResponse(w, http.StatusUnauthorized, utils.ErrorResponse{
 				Error: "Unauthorized: " + err.Error(),
 			})
+			return
 		}
 
 		ctx := context.WithValue(r.Context(), userContextKey, claims)
@@ -53,6 +55,19 @@ func GetClaimsFromAuthCookie(w http.ResponseWriter, r *http.Request) (*jwt.Regis
 	if err != nil || !token.Valid {
 		return nil, fmt.Errorf("invalid token")
 	}
+
+	// Additional claim checks (just to be safe)
+	now := time.Now()
+	if claims.ExpiresAt == nil || claims.ExpiresAt.Time.Before(now) {
+		return nil, fmt.Errorf("token expired")
+	}
+	if claims.IssuedAt != nil && claims.IssuedAt.Time.After(now) {
+		return nil, fmt.Errorf("token issued in the future")
+	}
+	if claims.NotBefore != nil && claims.NotBefore.Time.After(now) {
+		return nil, fmt.Errorf("token not active yet")
+	}
+
 	return claims, nil
 }
 
