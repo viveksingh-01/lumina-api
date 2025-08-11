@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/viveksingh-01/lumina-api/models"
+	"github.com/viveksingh-01/lumina-api/utils"
 	"google.golang.org/genai"
 )
 
@@ -19,18 +20,15 @@ var (
 const GEMINI_MODEL = "gemini-2.0-flash"
 
 func HandleChat(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	if !validateRequestMethod(w, r) {
 		return
 	}
-	if r.Body == nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	if !validateRequestBody(w, r) {
 		return
 	}
 
 	var req models.ChatRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Couldn't decode the JSON", http.StatusInternalServerError)
+	if !decodeToJSON(w, r, &req) {
 		return
 	}
 
@@ -47,11 +45,12 @@ func HandleChat(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := session.SendMessage(r.Context(), genai.Part{Text: req.Message})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
+			Error: err.Error(),
+		})
 		return
 	}
 
-	res := models.ChatResponse{Response: resp.Text()}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
+	json.NewEncoder(w).Encode(models.ChatResponse{Response: resp.Text()})
 }
