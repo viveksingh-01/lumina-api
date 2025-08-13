@@ -52,13 +52,19 @@ func decodeToJSON(w http.ResponseWriter, r *http.Request, v any) bool {
 }
 
 func setCookie(w http.ResponseWriter, token string) {
-	http.SetCookie(w, &http.Cookie{
+	http.SetCookie(w, createCookie(token, 0))
+}
+
+func createCookie(value string, maxAge int) *http.Cookie {
+	cookie := &http.Cookie{
 		Name:     "auth_token",
-		Value:    token,
+		Value:    value,
 		HttpOnly: true,
 		Path:     "/",
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
+		MaxAge:   maxAge,
 		Expires:  time.Now().Add(24 * time.Hour),
-	})
+	}
+	return cookie
 }
