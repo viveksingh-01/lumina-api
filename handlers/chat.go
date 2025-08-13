@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/viveksingh-01/lumina-api/middlewares"
 	"github.com/viveksingh-01/lumina-api/models"
 	"github.com/viveksingh-01/lumina-api/utils"
 	"google.golang.org/genai"
@@ -20,6 +21,13 @@ var (
 const GEMINI_MODEL = "gemini-2.0-flash"
 
 func HandleChat(w http.ResponseWriter, r *http.Request) {
+	claims := middlewares.GetClaimsFromContext(r.Context())
+	if claims == nil {
+		utils.SendErrorResponse(w, http.StatusUnauthorized, utils.ErrorResponse{
+			Error: "Unauthorized",
+		})
+		return
+	}
 	if !validateRequestMethod(w, r) {
 		return
 	}
