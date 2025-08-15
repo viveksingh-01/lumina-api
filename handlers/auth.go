@@ -55,6 +55,10 @@ func setCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, createCookie(token, 0))
 }
 
+func deleteCookie(w http.ResponseWriter) {
+	http.SetCookie(w, createCookie("", -1))
+}
+
 func createCookie(value string, maxAge int) *http.Cookie {
 	cookie := &http.Cookie{
 		Name:     "auth_token",

@@ -17,5 +17,6 @@ func RegisterRoutes(router *mux.Router) {
 	secured.Use(middlewares.AuthMiddleware)
 
 	secured.HandleFunc("/me", handlers.MeHandler).Methods(http.MethodGet)
+	secured.HandleFunc("/logout", handlers.Logout).Methods(http.MethodPost)
 	secured.HandleFunc("/chat", handlers.HandleChat)
 }
