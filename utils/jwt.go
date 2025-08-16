@@ -10,7 +10,7 @@ import (
 var jwtSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
 
 func GenerateJWT(subject string) (string, error) {
-	tokenDuration := 72 * time.Hour
+	tokenDuration := 6 * time.Hour
 	claims := jwt.MapClaims{
 		"sub": subject,
 		"iat": time.Now().Unix(),
