@@ -16,8 +16,11 @@ import (
 func main() {
 	fmt.Println("Welcome to Lumina API.")
 
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading the .env file")
+	// Load environment variables from .env file when running locally
+	if os.Getenv("PRODUCTION") == "" {
+		if err := godotenv.Load(); err != nil {
+			log.Fatal("Error loading the .env file.")
+		}
 	}
 
 	config.ConnectToDB()
