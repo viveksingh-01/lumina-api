@@ -20,7 +20,7 @@ const userContextKey = contextKey("user")
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		claims, err := GetClaimsFromAuthCookie(w, r)
+		claims, err := GetClaimsFromRequest(w, r)
 		if err != nil {
 			utils.SendErrorResponse(w, http.StatusUnauthorized, utils.ErrorResponse{
 				Error: "Unauthorized: " + err.Error(),
@@ -33,26 +33,23 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func GetClaimsFromAuthCookie(w http.ResponseWriter, r *http.Request) (*jwt.RegisteredClaims, error) {
-	cookie, err := r.Cookie("auth_token")
-	if err != nil {
-		return nil, fmt.Errorf("missing auth token")
-	}
+func GetClaimsFromRequest(w http.ResponseWriter, r *http.Request) (*jwt.RegisteredClaims, error) {
+	token := r.Header.Get("Authorization")
 
-	tokenStr := strings.TrimSpace(cookie.Value)
-	if tokenStr == "" {
+	token = strings.TrimSpace(token)
+	if token == "" {
 		return nil, fmt.Errorf("empty token")
 	}
 
 	claims := &jwt.RegisteredClaims{}
-	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (any, error) {
+	t, err := jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrTokenSignatureInvalid
 		}
 		return []byte(jwtSecret), nil
 	})
 
-	if err != nil || !token.Valid {
+	if err != nil || !t.Valid {
 		return nil, fmt.Errorf("invalid token")
 	}
 

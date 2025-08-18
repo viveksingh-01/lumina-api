@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/viveksingh-01/lumina-api/utils"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -50,30 +48,4 @@ func decodeToJSON(w http.ResponseWriter, r *http.Request, v any) bool {
 		return false
 	}
 	return true
-}
-
-func setCookie(w http.ResponseWriter, token string) {
-	http.SetCookie(w, createCookie(token, 86400))
-}
-
-func deleteCookie(w http.ResponseWriter) {
-	http.SetCookie(w, createCookie("", -1))
-}
-
-func createCookie(value string, maxAge int) *http.Cookie {
-	secure, sameSite := true, http.SameSiteNoneMode
-	if os.Getenv("PRODUCTION") == "" {
-		secure, sameSite = false, http.SameSiteLaxMode
-	}
-	cookie := &http.Cookie{
-		Name:     "auth_token",
-		Value:    value,
-		HttpOnly: true,
-		Path:     "/",
-		Secure:   secure,
-		SameSite: sameSite,
-		MaxAge:   maxAge,
-		Expires:  time.Now().Add(24 * time.Hour),
-	}
-	return cookie
 }

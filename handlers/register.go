@@ -75,14 +75,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set the token as cookie
-	setCookie(w, token)
-
 	// Send the response to client
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
 		"message": "User registered successfully.",
+		"token":   token,
 		"data": map[string]string{
 			"id":    user.ID.Hex(),
 			"email": user.Email,

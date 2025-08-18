@@ -57,12 +57,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	setCookie(w, token)
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]any{
 		"success": true,
 		"message": "You've logged-in successfully!",
+		"token":   token,
 		"data": map[string]string{
 			"id":    user.ID.Hex(),
 			"email": user.Email,
