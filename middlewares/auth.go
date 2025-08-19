@@ -3,6 +3,7 @@ package middlewares
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -50,6 +51,7 @@ func GetClaimsFromRequest(w http.ResponseWriter, r *http.Request) (*jwt.Register
 	})
 
 	if err != nil || !t.Valid {
+		log.Println("Auth middleware error: ", err.Error())
 		return nil, fmt.Errorf("invalid token")
 	}
 
