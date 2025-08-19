@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-var jwtSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
+var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 func GenerateJWT(subject string) (string, error) {
 	tokenDuration := 6 * time.Hour

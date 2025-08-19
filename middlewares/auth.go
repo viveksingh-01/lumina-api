@@ -13,11 +13,15 @@ import (
 	"github.com/viveksingh-01/lumina-api/utils"
 )
 
-var jwtSecret = os.Getenv("JWT_SECRET")
+var jwtSecret string
 
 type contextKey string
 
-const userContextKey = contextKey("user")
+const userContextKey contextKey = "user"
+
+func init() {
+	jwtSecret = os.Getenv("JWT_SECRET")
+}
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
