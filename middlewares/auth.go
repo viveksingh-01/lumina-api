@@ -39,27 +39,30 @@ func AuthMiddleware(next http.Handler) http.Handler {
 }
 
 func GetClaimsFromRequest(w http.ResponseWriter, r *http.Request) (*jwt.RegisteredClaims, error) {
-	token := r.Header.Get("Authorization")
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		return nil, fmt.Errorf("invalid token")
+	}
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
-	token = strings.TrimSpace(token)
-	if token == "" {
+	if tokenString = strings.TrimSpace(tokenString); tokenString == "" {
 		return nil, fmt.Errorf("empty token")
 	}
 
 	claims := &jwt.RegisteredClaims{}
-	t, err := jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (any, error) {
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrTokenSignatureInvalid
 		}
 		return []byte(jwtSecret), nil
 	})
 
-	if err != nil || !t.Valid {
+	if err != nil || !token.Valid {
 		log.Println("Auth middleware error: ", err.Error())
 		return nil, fmt.Errorf("invalid token")
 	}
 
-	// Additional claim checks (just to be safe)
+	// Additional claim checks
 	now := time.Now()
 	if claims.ExpiresAt == nil || claims.ExpiresAt.Time.Before(now) {
 		return nil, fmt.Errorf("token expired")
