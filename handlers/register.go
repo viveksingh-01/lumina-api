@@ -30,14 +30,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	err := userCollection.FindOne(context.TODO(), bson.M{"email": req.Email}).Decode(&user)
 	if err == nil {
 		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
-			Error: "Username already exists, please try with a different one.",
+			Error: "The email is already registered.\n Please try logging in.",
 		})
 		return
 	}
 	if err != mongo.ErrNoDocuments {
 		log.Println("Database error: " + err.Error())
 		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
-			Error: "An internal error occurred, please try again.",
+			Error: "An internal error occurred,\n Please try again.",
 		})
 		return
 	}
@@ -47,7 +47,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error occurred while hashing password:", err.Error())
 		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
-			Error: "Couldn't process the request, please try again.",
+			Error: "The request couldn't be processed.\n Please try again after some time.",
 		})
 		return
 	}
@@ -60,7 +60,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	if _, err := userCollection.InsertOne(context.TODO(), user); err != nil {
 		log.Println("Error occurred while inserting user's record to DB:", err.Error())
 		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
-			Error: "Couldn't process the request, please try again.",
+			Error: "The request couldn't be processed.\n Please try again after some time.",
 		})
 		return
 	}
@@ -70,7 +70,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error generating JWT:", err.Error())
 		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
-			Error: "Couldn't process the request, please try again.",
+			Error: "The request couldn't be processed.\n Please try again after some time.",
 		})
 		return
 	}
