@@ -44,7 +44,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	// Validate input password by comparing with hashed password stored in DB
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
 		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
-			Error: "Invalid email or password, please try again.",
+			Error: "Invalid email or password.\n Please check and try again.",
 		})
 		return
 	}
@@ -53,7 +53,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error generating JWT:", err.Error())
 		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
-			Error: "Couldn't process the request, please try again.",
+			Error: "Couldn't process the request.\n Please try again after some time.",
 		})
 		return
 	}
