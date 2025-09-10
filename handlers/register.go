@@ -14,14 +14,14 @@ import (
 )
 
 func Register(w http.ResponseWriter, r *http.Request) {
-	if !validateRequestMethod(w, r) {
+	if !utils.ValidateRequestMethod(w, r) {
 		return
 	}
-	if !validateRequestBody(w, r) {
+	if !utils.ValidateRequestBody(w, r) {
 		return
 	}
 	var req models.RegisterRequest
-	if !decodeToJSON(w, r, &req) {
+	if !utils.DecodeToJSON(w, r, &req) {
 		return
 	}
 

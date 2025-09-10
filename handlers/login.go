@@ -13,14 +13,14 @@ import (
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	if !validateRequestBody(w, r) {
+	if !utils.ValidateRequestBody(w, r) {
 		return
 	}
-	if !validateRequestMethod(w, r) {
+	if !utils.ValidateRequestMethod(w, r) {
 		return
 	}
 	var req models.LoginRequest
-	if !decodeToJSON(w, r, &req) {
+	if !utils.DecodeToJSON(w, r, &req) {
 		return
 	}
 

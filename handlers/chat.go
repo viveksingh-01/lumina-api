@@ -28,15 +28,15 @@ func HandleChat(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	if !validateRequestMethod(w, r) {
+	if !utils.ValidateRequestMethod(w, r) {
 		return
 	}
-	if !validateRequestBody(w, r) {
+	if !utils.ValidateRequestBody(w, r) {
 		return
 	}
 
 	var req models.ChatRequest
-	if !decodeToJSON(w, r, &req) {
+	if !utils.DecodeToJSON(w, r, &req) {
 		return
 	}
 
