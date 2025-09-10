@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/viveksingh-01/lumina-api/handlers"
+	"github.com/viveksingh-01/lumina-api/database"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
@@ -30,5 +30,5 @@ func ConnectToDB() {
 	if DB == nil {
 		log.Fatal("Database connection is not initialized")
 	}
-	handlers.SetUserCollection(DB.Collection("users"))
+	database.SetCollections(DB)
 }

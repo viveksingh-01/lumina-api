@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/viveksingh-01/lumina-api/database"
 	"github.com/viveksingh-01/lumina-api/models"
 	"github.com/viveksingh-01/lumina-api/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -26,7 +27,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 	// Check if the user exists
-	err := userCollection.FindOne(context.TODO(), bson.M{"email": req.Email}).Decode(&user)
+	err := database.UserCollection.FindOne(context.TODO(), bson.M{"email": req.Email}).Decode(&user)
 	if err == mongo.ErrNoDocuments {
 		log.Println("User doesn't exist")
 		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{

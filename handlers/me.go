@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/viveksingh-01/lumina-api/database"
 	"github.com/viveksingh-01/lumina-api/middlewares"
 	"github.com/viveksingh-01/lumina-api/models"
 	"github.com/viveksingh-01/lumina-api/utils"
@@ -31,7 +32,7 @@ func MeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user models.User
-	err = userCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&user)
+	err = database.UserCollection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&user)
 	if err == mongo.ErrNoDocuments {
 		log.Println("User doesn't exist")
 		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{

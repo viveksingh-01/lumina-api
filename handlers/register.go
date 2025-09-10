@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/viveksingh-01/lumina-api/database"
 	"github.com/viveksingh-01/lumina-api/models"
 	"github.com/viveksingh-01/lumina-api/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -27,7 +28,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 	// Check if the user already exists based on the 'email'
-	err := userCollection.FindOne(context.TODO(), bson.M{"email": req.Email}).Decode(&user)
+	err := database.UserCollection.FindOne(context.TODO(), bson.M{"email": req.Email}).Decode(&user)
 	if err == nil {
 		utils.SendErrorResponse(w, http.StatusBadRequest, utils.ErrorResponse{
 			Error: "The email is already registered.\n Please try logging in.",
@@ -57,7 +58,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	user.Password = hashedPassword
 	user.CreatedAt = time.Now()
 
-	if _, err := userCollection.InsertOne(context.TODO(), user); err != nil {
+	if _, err := database.UserCollection.InsertOne(context.TODO(), user); err != nil {
 		log.Println("Error occurred while inserting user's record to DB:", err.Error())
 		utils.SendErrorResponse(w, http.StatusInternalServerError, utils.ErrorResponse{
 			Error: "The request couldn't be processed.\n Please try again after some time.",
